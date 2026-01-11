@@ -1,15 +1,27 @@
+import dotenv from "dotenv";
+dotenv.config({
+  path: ".env.local",
+});
+
 import express from "express";
 import multer from "multer";
+import cors from "cors";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 
 const app = express();
 
-// Multer dùng memory (KHÔNG ghi disk)
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: false,
+  })
+);
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 1024 * 1024 * 500, // 500MB (tuỳ chỉnh)
+    fileSize: 1024 * 1024 * 500,
   },
 });
 
@@ -22,25 +34,21 @@ const s3 = new S3Client({
   },
 });
 
-// Health check (Railway cần)
 app.get("/", (_, res) => {
   res.send("Upload worker is running");
 });
 
-/**
- * POST /upload-video
- * form-data:
- *  - file: video file
- */
 app.post("/upload-video", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
+
+    console.log("Received file:", file ? file.originalname : "No file");
 
     if (!file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const key = `uploads/${uuidv4()}-${file.originalname}`;
+    const key = `uploads/${uuidv4()}`;
 
     await s3.send(
       new PutObjectCommand({
@@ -65,7 +73,7 @@ app.post("/upload-video", upload.single("file"), async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Upload worker running on port ${PORT}`);
 });
