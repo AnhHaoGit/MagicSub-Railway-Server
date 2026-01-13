@@ -45,5 +45,6 @@ export async function processVideo(req, res) {
     ok: true,
     _id: result.insertedId,
     transcript: segments,
+    createdAt: date.toISOString(),
   });
 }
