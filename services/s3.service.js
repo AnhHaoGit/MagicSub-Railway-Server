@@ -4,7 +4,7 @@ import { ENV } from "../config/env.js";
 import { v4 as uuidv4 } from "uuid";
 
 export async function uploadToS3(file) {
-  const key = `uploads/${uuidv4()}-${file.originalname}`;
+  const key = `uploads/${uuidv4()}`;
 
   await s3.send(
     new PutObjectCommand({
@@ -17,6 +17,6 @@ export async function uploadToS3(file) {
 
   return {
     key,
-    fileUrl: `https://${ENV.AWS_S3_BUCKET}.s3.${ENV.AWS_REGION}.amazonaws.com/${key}`,
+    cloudUrl: `https://${ENV.AWS_S3_BUCKET}.s3.${ENV.AWS_REGION}.amazonaws.com/${key}`,
   };
 }

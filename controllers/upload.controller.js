@@ -5,5 +5,6 @@ export async function uploadVideo(req, res) {
   if (!file) return res.status(400).json({ error: "No file" });
 
   const result = await uploadToS3(file);
-  res.json({ ok: true, ...result, size: file.size });
+
+  res.json({ ok: true, ...result });
 }

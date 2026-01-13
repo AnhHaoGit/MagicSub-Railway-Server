@@ -4,12 +4,14 @@ import {
 } from "../services/ffmpeg.service.js";
 import { whisperChunk } from "../services/whisper.service.js";
 import { srtToSecondsTimestamp } from "../libs/srt_to_second.js";
+import { connectDB } from "../services/mongodb.service.js";
+import {ObjectId} from "mongodb";
 
 export async function processVideo(req, res) {
-  const { videoUrl } = req.body;
-  if (!videoUrl) return res.status(400).json({ error: "Missing videoUrl" });
+  const { userId, cloudUrl, uploadKey, title, size, duration, customize } =
+    req.body;
 
-  const audioBuffer = await extractAudioBuffer(videoUrl);
+  const audioBuffer = await extractAudioBuffer(cloudUrl);
   const chunks = chunkAudioBuffer(audioBuffer);
 
   let offset = 0;
@@ -23,5 +25,25 @@ export async function processVideo(req, res) {
     }
   }
 
-  res.json({ ok: true, segments });
+  const date = new Date();
+
+  const db = await connectDB();
+
+  const result = await db.collection("videos").insertOne({
+    userId: new ObjectId(userId),
+    title,
+    size,
+    duration,
+    cloudUrl,
+    uploadKey,
+    customize,
+    transcript: segments,
+    createdAt: date.toISOString(),
+  });
+
+  res.json({
+    ok: true,
+    _id: result.insertedId,
+    transcript: segments,
+  });
 }

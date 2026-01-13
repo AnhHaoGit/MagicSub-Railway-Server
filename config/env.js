@@ -5,7 +5,8 @@ dotenv.config({
 
 export const ENV = {
   PORT: process.env.PORT || 8000,
-
+  MONGODB_URI: process.env.MONGODB_URI,
+  MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "magicsub_db",
   AWS_REGION: process.env.AWS_REGION,
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
