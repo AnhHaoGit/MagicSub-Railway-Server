@@ -1,5 +1,6 @@
 import axios from "axios";
 import { spawn } from "child_process";
+import path from "path";
 
 export async function extractAudioBuffer(videoUrl) {
   return new Promise(async (resolve, reject) => {
@@ -40,4 +41,40 @@ export function chunkAudioBuffer(buffer, chunkSizeMB = 24) {
     chunks.push(buffer.slice(i, i + size));
   }
   return chunks;
+}
+
+export function generateTempMp4(cloudUrl, assPath, outputPath) {
+  return new Promise((resolve, reject) => {
+    const fontsDir = path.join(process.cwd(), "public", "fonts");
+
+    const ffmpeg = spawn("ffmpeg", [
+      "-i",
+      cloudUrl,
+      "-vf",
+      `ass=${assPath}:fontsdir=${fontsDir}`,
+      "-c:v",
+      "libx264",
+      "-preset",
+      "veryfast",
+      "-crf",
+      "21",
+      "-pix_fmt",
+      "yuv420p",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "192k",
+      "-movflags",
+      "+faststart",
+      outputPath,
+    ]);
+
+    ffmpeg.stderr.on("data", (d) => console.log("[ffmpeg]", d.toString()));
+
+    ffmpeg.on("error", reject);
+    ffmpeg.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`ffmpeg exited with code ${code}`));
+    });
+  });
 }
