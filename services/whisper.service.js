@@ -5,7 +5,7 @@ import { formatSrtFile } from "../libs/format_srt_file.js";
 
 const WHISPER_API_URL = "https://api.openai.com/v1/audio/transcriptions";
 
-export async function whisperChunk(buffer, offsetSeconds) {
+export async function whisperChunk(buffer, offsetSeconds, sourceLanguage) {
   const form = new FormData();
 
   form.append("file", buffer, {
@@ -14,7 +14,9 @@ export async function whisperChunk(buffer, offsetSeconds) {
   });
   form.append("model", "whisper-1");
   form.append("response_format", "srt");
-  form.append("language", "vi");
+  if (sourceLanguage !== "auto") {
+    form.append("language", sourceLanguage);
+  }
 
   const res = await axios.post(WHISPER_API_URL, form, {
     headers: {
@@ -22,7 +24,6 @@ export async function whisperChunk(buffer, offsetSeconds) {
       ...form.getHeaders(),
     },
   });
-
 
   const formattedSrt = formatSrtFile(res.data, offsetSeconds);
 

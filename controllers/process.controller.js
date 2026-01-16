@@ -8,7 +8,7 @@ import { connectDB } from "../services/mongodb.service.js";
 import {ObjectId} from "mongodb";
 
 export async function processVideo(req, res) {
-  const { userId, cloudUrl, uploadKey, title, size, duration, customize } =
+  const { userId, cloudUrl, uploadKey, title, size, duration, customize, sourceLanguage } =
     req.body;
 
   const audioBuffer = await extractAudioBuffer(cloudUrl);
@@ -18,7 +18,7 @@ export async function processVideo(req, res) {
   const segments = [];
 
   for (const chunk of chunks) {
-    const s = await whisperChunk(chunk, offset);
+    const s = await whisperChunk(chunk, offset, sourceLanguage);
     if (s.length) {
       offset = srtToSecondsTimestamp(s[s.length - 1].end);
       segments.push(...s);
@@ -39,6 +39,7 @@ export async function processVideo(req, res) {
     customize,
     transcript: segments,
     createdAt: date.toISOString(),
+    sourceLanguage
   });
 
   res.json({
