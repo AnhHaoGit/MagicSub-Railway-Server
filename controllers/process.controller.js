@@ -5,11 +5,19 @@ import {
 import { whisperChunk } from "../services/whisper.service.js";
 import { srtToSecondsTimestamp } from "../libs/srt_to_second.js";
 import { connectDB } from "../services/mongodb.service.js";
-import {ObjectId} from "mongodb";
+import { ObjectId } from "mongodb";
 
 export async function processVideo(req, res) {
-  const { userId, cloudUrl, uploadKey, title, size, duration, customize, sourceLanguage } =
-    req.body;
+  const {
+    userId,
+    cloudUrl,
+    uploadKey,
+    title,
+    size,
+    duration,
+    customize,
+    sourceLanguage,
+  } = req.body;
 
   const audioBuffer = await extractAudioBuffer(cloudUrl);
   const chunks = chunkAudioBuffer(audioBuffer);
@@ -39,7 +47,8 @@ export async function processVideo(req, res) {
     customize,
     transcript: segments,
     createdAt: date.toISOString(),
-    sourceLanguage
+    sourceLanguage,
+    mode: "private",
   });
 
   res.json({
