@@ -49,6 +49,7 @@ export async function processVideo(req, res) {
     createdAt: date.toISOString(),
     sourceLanguage,
     mode: "private",
+    allowedUsers: [],
   });
 
   res.json({
