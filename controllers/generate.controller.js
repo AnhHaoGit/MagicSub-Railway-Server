@@ -15,9 +15,9 @@ export async function generateVideoController(req, res) {
   let tempMp4 = null;
 
   try {
-    const { subtitle, customize, cloudUrl, videoId, userId } = req.body;
+    const { subtitle, customize, cloudUrl, videoId } = req.body;
 
-    if (!subtitle || !customize || !cloudUrl || !videoId || !userId) {
+    if (!subtitle || !customize || !cloudUrl || !videoId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -39,7 +39,7 @@ export async function generateVideoController(req, res) {
 
     const db = await connectDB();
     await db.collection("videos").updateOne(
-      { _id: new ObjectId(videoId), userId: new ObjectId(userId) },
+      { _id: new ObjectId(videoId) },
       {
         $push: {
           cloudUrls: {
@@ -49,7 +49,7 @@ export async function generateVideoController(req, res) {
             createdAt: date.toISOString(),
           },
         },
-      }
+      },
     );
 
     res.json({
